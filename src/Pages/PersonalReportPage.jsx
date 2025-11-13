@@ -8,12 +8,18 @@ const personalReportOptions = [
   { key: "commission-payout-summary", label: "Commission Summary" },
   { key: "withdrawal-requests", label: "My Withdrawal Requests" },
   { key: "withdrawal-transactions", label: "Withdrawal Transactions" },
+  { key: "payments", label: "Payments" },
   { key: "full-transactions", label: "Full Transaction History" },
 ];
 
 const PersonalReportPage = () => {
   const [selectedReport, setSelectedReport] = useState("");
-  const [filters, setFilters] = useState({ from: "", to: "", status: "" });
+  const [filters, setFilters] = useState({
+    from: "",
+    to: "",
+    status: "",
+    paymentType: "",
+  });
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,6 +37,8 @@ const PersonalReportPage = () => {
       if (filters.to) params.append("to", filters.to);
       if (filters.status && (selectedReport.includes("commission") || selectedReport.includes("withdrawal")))
         params.append("status", filters.status);
+      if (selectedReport === "payments" && filters.paymentType)
+        params.append("paymentType", filters.paymentType);
 
       const res = await baseApi.get(`my-reports/${selectedReport}?${params.toString()}`);
       console.log(res)
@@ -96,6 +104,18 @@ const PersonalReportPage = () => {
             value={filters.status}
             onChange={handleFilterChange}
           />
+        )}
+
+        {selectedReport === "payments" && (
+          <select
+            name="paymentType"
+            value={filters.paymentType}
+            onChange={handleFilterChange}
+          >
+            <option value="">All Payments</option>
+            <option value="Order">Order Payments</option>
+            <option value="Withdrawal">Distributor Payments</option>
+          </select>
         )}
 
         <button onClick={fetchReport} className="btn-fetch">
